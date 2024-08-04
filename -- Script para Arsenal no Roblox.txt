@@ -1,0 +1,62 @@
+-- Script para Arsenal no Roblox
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local TeamColor = LocalPlayer.TeamColor -- Cor da equipe do jogador local
+
+-- Função para desenhar os jogadores da equipe no radar
+local function DrawTeamPlayers()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local character = player.Character
+            if character then
+                local humanoid = character:FindFirstChild("Humanoid")
+                if humanoid then
+                    local head = character:FindFirstChild("Head")
+                    if head then
+                        local teamIndicator = Instance.new("BillboardGui")
+                        teamIndicator.Adornee = head
+                        teamIndicator.Size = UDim2.new(0, 100, 0, 20)
+                        teamIndicator.StudsOffset = Vector3.new(0, 2, 0)
+                        teamIndicator.AlwaysOnTop = true
+
+                        local teamLabel = Instance.new("TextLabel")
+                        teamLabel.Text = player.Name
+                        teamLabel.Font = Enum.Font.SourceSansBold
+                        teamLabel.TextSize = 14
+                        teamLabel.TextColor3 = player.Team == LocalPlayer.Team and TeamColor or Color3.new(1, 0, 0) -- Azul para equipe amiga, vermelho para equipe inimiga
+                        teamLabel.BackgroundTransparency = 1
+                        teamLabel.Size = UDim2.new(1, 0, 1, 0)
+
+                        teamLabel.Parent = teamIndicator
+                        teamIndicator.Parent = game.CoreGui
+                    end
+                end
+            end
+        end
+    end
+end
+
+-- Função para ativar/desativar o ESP
+local ESPEnabled = true
+
+local function ToggleESP()
+    for _, gui in pairs(game.CoreGui:GetChildren()) do
+        if gui:IsA("BillboardGui") then
+            gui:Destroy()
+        end
+    end
+    ESPEnabled = not ESPEnabled
+    if ESPEnabled then
+        DrawTeamPlayers()
+    end
+end
+
+-- Ativar o ESP por padrão
+DrawTeamPlayers()
+
+-- Tecla para ativar/desativar o ESP
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessedEvent)
+    if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.P then
+        ToggleESP()
+    end
+end)
